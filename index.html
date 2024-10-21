@@ -1,0 +1,305 @@
+<html>
+ <head>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <style>
+   body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2d2d2d;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .music-player {
+            background-color: #3a3a3a;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 300px;
+        }
+        .album-cover {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .controls i {
+            color: #a0aec0;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .controls i.heart {
+            color: #ff6b6b;
+        }
+        .play-button {
+            background-color: #4a4a4a;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: #a0aec0;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .song-info {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .song-info h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #e2e2e2;
+        }
+        .song-info p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            color: #a0aec0;
+        }
+        .progress-container {
+            width: 100%;
+            margin-top: 20px;
+            position: relative;
+        }
+        .progress {
+            width: 100%;
+            height: 5px;
+            background-color: #5a5a5a;
+            border-radius: 5px;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #ffa500;
+            border-radius: 5px;
+            position: relative;
+        }
+        .progress-ball {
+            width: 12px;
+            height: 12px;
+            background-color: #ffa500;
+            border-radius: 50%;
+            position: absolute;
+            top: -3.5px;
+            transform: translateX(-50%);
+            cursor: pointer;
+        }
+        .time {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #a0aec0;
+        }
+        @keyframes glow {
+            0% {
+                color: #a0aec0;
+                text-shadow: none;
+            }
+            50% {
+                color: lightblue;
+                text-shadow: 0 0 10px lightblue;
+            }
+            100% {
+                color: #a0aec0;
+                text-shadow: none;
+            }
+        }
+  </style>
+ </head>
+ <body>
+  <div class="music-player">
+   <img alt="Aesthetic flower" class="album-cover" height="300" id="album-cover" src="https://via.placeholder.com/300x300.png?text=Aesthetic+Flower" width="300"/>
+   <div class="controls">
+    <i class="fas fa-heart heart">
+    </i>
+    <i class="fas fa-external-link-alt" onclick="redirectToLink()" style="color: rgb(160, 174, 192);">
+    </i>
+    <i class="fas fa-backward" onclick="playPreviousSong()" style="color: rgb(160, 174, 192);">
+    </i>
+    <i class="fas fa-forward" onclick="playNextSong()" style="color: rgb(160, 174, 192);">
+    </i>
+   </div>
+   <button class="play-button" onclick="togglePlayPause()">
+    <i class="fas fa-play">
+    </i>
+   </button>
+   <div class="song-info">
+    <h3 id="song-artist">
+     Sia
+    </h3>
+    <p id="song-title">
+     Butterflies
+    </p>
+   </div>
+   <div class="progress-container">
+    <div class="progress" id="progress">
+     <div class="progress-bar" id="progress-bar">
+      <div class="progress-ball" id="progress-ball" style="left: 0%;">
+      </div>
+     </div>
+    </div>
+    <div class="time">
+     <span id="current-time">
+      00:00
+     </span>
+     <span id="duration">
+      00:00
+     </span>
+    </div>
+   </div>
+  </div>
+  <audio id="audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+  <script>
+   const audio = document.getElementById('audio');
+        const playButton = document.querySelector('.play-button i');
+        const backwardButton = document.querySelector('.fa-backward');
+        const forwardButton = document.querySelector('.fa-forward');
+        const externalLinkButton = document.querySelector('.fa-external-link-alt');
+        const songArtist = document.getElementById('song-artist');
+        const songTitle = document.getElementById('song-title');
+        const albumCover = document.getElementById('album-cover');
+        const progressBar = document.getElementById('progress-bar');
+        const progressBall = document.getElementById('progress-ball');
+        const currentTimeElement = document.getElementById('current-time');
+        const durationElement = document.getElementById('duration');
+        const progressContainer = document.getElementById('progress');
+
+        const songs = [
+            { artist: 'Sia', title: 'Butterflies', src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', cover: 'https://img.freepik.com/premium-photo/ocean-caliming-waves-pink-orange-sunset_946110-37.jpg' },
+            { artist: 'Artist 2', title: 'Song 2', src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', cover: 'https://i.pinimg.com/736x/22/3e/31/223e31d5ddd679d263dd76a135564191.jpg' },
+            { artist: 'Artist 3', title: 'Song 3', src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', cover: 'https://i.pinimg.com/originals/3e/78/ac/3e78ac5662fec8cf307fb1086cb3fb3c.jpg' }
+        ];
+
+        let currentSongIndex = 0;
+        let isDragging = false;
+
+        function togglePlayPause() {
+            if (audio.paused) {
+                audio.play();
+                playButton.classList.remove('fa-play');
+                playButton.classList.add('fa-pause');
+            } else {
+                audio.pause();
+                playButton.classList.remove('fa-pause');
+                playButton.classList.add('fa-play');
+            }
+        }
+
+        function playPreviousSong() {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            updateSongInfo();
+            audio.play();
+            playButton.classList.remove('fa-play');
+            playButton.classList.add('fa-pause');
+
+            // Add glow animation
+            backwardButton.style.animation = 'glow 0.5s';
+            setTimeout(() => {
+                backwardButton.style.animation = '';
+            }, 500);
+        }
+
+        function playNextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            updateSongInfo();
+            audio.play();
+            playButton.classList.remove('fa-play');
+            playButton.classList.add('fa-pause');
+
+            // Add glow animation
+            forwardButton.style.animation = 'glow 0.5s';
+            setTimeout(() => {
+                forwardButton.style.animation = '';
+            }, 500);
+        }
+
+        function updateSongInfo() {
+            const song = songs[currentSongIndex];
+            songArtist.textContent = song.artist;
+            songTitle.textContent = song.title;
+            audio.src = song.src;
+            albumCover.src = song.cover;
+        }
+
+        function redirectToLink() {
+            // Add glow animation
+            externalLinkButton.style.animation = 'glow 0.5s';
+            setTimeout(() => {
+                externalLinkButton.style.animation = '';
+                window.location.href = 'https://www.youtube.com/watch?v=example'; // Replace with the actual YouTube link
+            }, 500);
+        }
+
+        function updateProgress() {
+            if (!isDragging) {
+                const currentTime = audio.currentTime;
+                const duration = audio.duration;
+                const progressPercent = (currentTime / duration) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                progressBall.style.left = `${progressPercent}%`;
+
+                currentTimeElement.textContent = formatTime(currentTime);
+                durationElement.textContent = formatTime(duration);
+            }
+        }
+
+        function formatTime(time) {
+            const minutes = Math.floor(time / 60);
+            const seconds = Math.floor(time % 60);
+            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        function onDragStart(e) {
+            isDragging = true;
+            audio.pause();
+        }
+
+        function onDrag(e) {
+            if (isDragging) {
+                const rect = progressContainer.getBoundingClientRect();
+                const offsetX = e.clientX - rect.left;
+                const progressPercent = Math.max(0, Math.min(100, (offsetX / rect.width) * 100));
+                progressBar.style.width = `${progressPercent}%`;
+                progressBall.style.left = `${progressPercent}%`;
+            }
+        }
+
+        function onDragEnd(e) {
+            if (isDragging) {
+                const rect = progressContainer.getBoundingClientRect();
+                const offsetX = e.clientX - rect.left;
+                const progressPercent = Math.max(0, Math.min(100, (offsetX / rect.width) * 100));
+                const newTime = (progressPercent / 100) * audio.duration;
+                audio.currentTime = newTime;
+                audio.play();
+                playButton.classList.remove('fa-play');
+                playButton.classList.add('fa-pause');
+                isDragging = false;
+            }
+        }
+
+        progressBall.addEventListener('mousedown', onDragStart);
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', onDragEnd);
+
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('loadedmetadata', () => {
+            durationElement.textContent = formatTime(audio.duration);
+        });
+  </script>
+ </body>
+</html>
